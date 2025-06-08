@@ -52,7 +52,7 @@ def main():
     async def healthcheck():
         return {"status": "ok", "message": "Yo, I am alive"}
     
-    # @server_app.middleware("http")
+    @server_app.middleware("http")
     async def log_request_processing_time(request: Request, call_next: Callable) -> Response:
         start_time = asyncio.get_event_loop().time()
         response: Response = await call_next(request)
