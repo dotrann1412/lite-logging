@@ -2,6 +2,7 @@ import httpx
 import os
 from enum import Enum
 import json
+from typing import Union
 
 class ContentType(str, Enum):
     TEXT = "text"
@@ -11,7 +12,7 @@ DEFAULT_TIMEOUT = 60
 SERVER_URL = os.getenv("LITE_LOGGING_BASE_URL", "http://localhost:8080")
 
 async def async_log(
-    message: str | dict, 
+    message: Union[str, dict], 
     tags: list[str] = [], 
     channel: str = "logs", 
     content_type: ContentType = ContentType.TEXT, 
@@ -36,7 +37,7 @@ async def async_log(
     return resp.status_code == 200
 
 def sync_log(
-    message: str | dict,
+    message: Union[str, dict],
     tags: list[str] = [],
     channel: str = "logs",
     content_type: ContentType = ContentType.TEXT,
