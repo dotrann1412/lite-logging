@@ -1,4 +1,4 @@
-from python:3.12
+from python:3.12-alpine
 
 copy requirements.txt requirements.txt
 run --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt
