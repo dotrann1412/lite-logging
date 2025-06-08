@@ -1,6 +1,6 @@
 [project]
 name = "lite-logging-client"
-version = "0.1.0"
+version = "1.0.0"
 description = "Lite logging client."
 authors = [
     {name = "Ngoc-Do Tran", email = "dotrann.1412@gmail.com"},
