@@ -1,0 +1,5 @@
+fastapi[standard]
+uvicorn
+pydantic
+sse-starlette
+httpx>=0.24.0
