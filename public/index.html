@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Log Viewer</title>
+    <title>Lite Logging</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 
@@ -24,7 +24,7 @@
                 </div>
             </div>
 
-            <h1>Log Viewer</h1>
+            <h1>Lite Logging</h1>
             <div id="title-section">
                 <div id="connection-status" class="status-disconnected">
                     <span id="status-indicator"></span>
@@ -87,6 +87,124 @@
 
         <div id="scroll-to-bottom" class="hidden">
             <button id="scroll-bottom-btn">↓ New logs available</button>
+        </div>
+
+        <!-- Floating Help Button -->
+        <div id="help-button">
+            <button id="help-btn" title="Show usage instructions">
+                <span class="help-icon">?</span>
+            </button>
+        </div>
+
+        <!-- Help Modal -->
+        <div id="help-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>📚 Lite Logging - Usage Instructions</h2>
+                    <button id="close-help" class="close-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="instruction-section">
+                        <h3>🔌 Channel Management</h3>
+                        <ul>
+                            <li><strong>Switch Channel:</strong> Enter channel name and click 🔗 or press Enter</li>
+                            <li><strong>Channel History:</strong> Click dropdown arrow to see previous channels</li>
+                            <li><strong>Auto-persist:</strong> Last used channel is remembered after reload</li>
+                        </ul>
+                    </div>
+
+                    <div class="instruction-section">
+                        <h3>🔍 Filtering & Search</h3>
+                        <ul>
+                            <li><strong>Search:</strong> Filter logs by keyword content</li>
+                            <li><strong>Tags:</strong> Filter by log tags</li>
+                            <li><strong>Type:</strong> Filter by log type (Plain Text, JSON)</li>
+                            <li><strong>Clear filters:</strong> Click × button to clear individual filters</li>
+                        </ul>
+                    </div>
+
+                    <div class="instruction-section">
+                        <h3>📋 Log Interaction</h3>
+                        <ul>
+                            <li><strong>Expand logs:</strong> Click on truncated logs to see full content</li>
+                            <li><strong>Select text:</strong> Click and drag in expanded logs to copy</li>
+                            <li><strong>JSON formatting:</strong> Expanded JSON logs are beautifully formatted</li>
+                        </ul>
+                    </div>
+
+                    <div class="instruction-section">
+                        <h3>⚡ Controls</h3>
+                        <ul>
+                            <li><strong>📜 Auto-scroll:</strong> Automatically scroll to new logs</li>
+                            <li><strong>⏸️ Pause:</strong> Stop receiving new logs temporarily</li>
+                            <li><strong>🗑️ Clear:</strong> Clear all logs for current channel</li>
+                            <li><strong>💾 Export:</strong> Download logs as JSON file</li>
+                        </ul>
+                    </div>
+
+                    <div class="instruction-section">
+                        <h3>⌨️ Keyboard Shortcuts</h3>
+                        <ul>
+                            <li><kbd>Ctrl+K</kbd> - Focus search input</li>
+                            <li><kbd>Ctrl+Shift+C</kbd> - Focus channel selector</li>
+                            <li><kbd>Ctrl+L</kbd> - Clear current channel logs</li>
+                            <li><kbd>Ctrl+E</kbd> - Export logs</li>
+                            <li><kbd>Ctrl+I</kbd> - Show storage info</li>
+                            <li><kbd>Space</kbd> - Toggle pause (when not typing)</li>
+                            <li><kbd>End</kbd> - Scroll to bottom</li>
+                            <li><kbd>Enter</kbd> - Expand/collapse focused log</li>
+                            <li><kbd>Ctrl+Shift+Delete</kbd> - Clear all storage ⚠️</li>
+                        </ul>
+                    </div>
+
+                    <div class="instruction-section">
+                        <h3>💾 Data Persistence</h3>
+                        <ul>
+                            <li><strong>Local Storage:</strong> Up to 1000 logs per channel stored locally</li>
+                            <li><strong>Channel Memory:</strong> Last used channel restored on reload</li>
+                            <li><strong>Offline Access:</strong> View stored logs without connection</li>
+                            <li><strong>Auto-cleanup:</strong> Old channel data removed when storage full</li>
+                        </ul>
+                    </div>
+
+                    <div class="instruction-section">
+                        <h3>🐍 Python Client Integration</h3>
+                        <p>Send logs programmatically to this server using the Python client:</p>
+
+                        <div class="code-section">
+                            <h4>📦 Installation</h4>
+                            <div class="code-block">
+                                <button class="copy-btn" data-copy="install">📋</button>
+                                <pre><code id="install-command">pip install git+https://github.com/dotrann1412/lite-logging.git</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <h4>🚀 Usage Example</h4>
+                            <div class="code-block">
+                                <button class="copy-btn" data-copy="usage">📋</button>
+                                <pre><code id="usage-example"># Loading example code...</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <h4>📡 Current Server Info</h4>
+                            <ul class="server-info">
+                                <li><strong>Server URL:</strong> <span id="current-server-url">Loading...</span></li>
+                                <li><strong>Active Channel:</strong> <span id="current-channel-name">Loading...</span></li>
+                                <li><strong>Connection:</strong> <span id="current-connection-status">Loading...</span></li>
+                            </ul>
+                        </div>
+
+                        <div class="note-box">
+                            <p><strong>📝 Note:</strong> The Python client automatically detects the server URL from the <code>LITE_LOGGING_BASE_URL</code> environment variable, or defaults to <code>http://localhost:8080</code>.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <p><em>💡 Tip: Most actions have keyboard shortcuts for faster workflow!</em></p>
+                </div>
+            </div>
         </div>
     </div>
 

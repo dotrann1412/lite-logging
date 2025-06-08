@@ -410,6 +410,10 @@ h1 {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 8px;
+    position: relative;
+    cursor: pointer;
+    user-select: none;
+    /* Prevent text selection on header for easier clicking */
 }
 
 .log-timestamp {
@@ -472,6 +476,115 @@ h1 {
 }
 
 
+/* Expandable Log Styles */
+
+.expand-icon {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.expand-icon:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+    color: #495057;
+}
+
+.log-item.expandable {
+    cursor: pointer;
+}
+
+.log-item.expandable:hover,
+.log-item.expandable:focus {
+    background-color: #f8f9fa;
+    border-left: 3px solid #007bff;
+    outline: none;
+}
+
+.log-item.expanded {
+    background-color: #fff;
+    border-left: 3px solid #28a745;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.log-item.expanded:hover {
+    background-color: #fff;
+}
+
+
+/* Content formatting */
+
+.log-preview {
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    color: #495057;
+    cursor: pointer;
+    user-select: none;
+    /* Prevent text selection on preview to make clicking easier */
+}
+
+.log-full {
+    animation: expandIn 0.2s ease-out;
+    cursor: text;
+    /* Show text cursor in expanded content */
+    user-select: text;
+    /* Allow text selection in expanded content */
+}
+
+.json-formatted {
+    background-color: #f8f9fa !important;
+    border: 1px solid #e9ecef !important;
+    border-radius: 6px !important;
+    padding: 16px !important;
+    margin: 8px 0 !important;
+    font-size: 0.8rem !important;
+    overflow-x: auto !important;
+    white-space: pre !important;
+    font-family: 'Monaco', 'Consolas', monospace !important;
+    line-height: 1.6 !important;
+    max-height: 400px;
+    overflow-y: auto;
+    cursor: text !important;
+    user-select: text !important;
+}
+
+.text-formatted {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 16px;
+    margin: 8px 0;
+    font-size: 0.85rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-family: 'Monaco', 'Consolas', monospace;
+    line-height: 1.6;
+    max-height: 400px;
+    overflow-y: auto;
+    cursor: text;
+    user-select: text;
+}
+
+@keyframes expandIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
 /* Utility Classes */
 
 .hidden {
@@ -500,7 +613,8 @@ h1 {
 
 #scroll-to-bottom {
     position: absolute;
-    bottom: 20px;
+    bottom: 80px;
+    /* Moved up to make room for help button */
     right: 20px;
     z-index: 1000;
 }
@@ -544,6 +658,306 @@ h1 {
 }
 
 
+/* Floating Help Button */
+
+#help-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1001;
+    /* Above scroll button */
+}
+
+#help-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+#help-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
+    background: linear-gradient(135deg, #5a67d8 0%, #667eea 100%);
+}
+
+#help-btn:active {
+    transform: translateY(0);
+}
+
+.help-icon {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+
+/* Help Modal */
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    max-width: 800px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modal-header {
+    padding: 24px 24px 16px;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: #495057;
+    font-size: 1.5rem;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    color: #6c757d;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.close-btn:hover {
+    background-color: #f8f9fa;
+    color: #495057;
+}
+
+.modal-body {
+    padding: 20px 24px;
+}
+
+.modal-footer {
+    padding: 16px 24px 24px;
+    border-top: 1px solid #e9ecef;
+    background-color: #f8f9fa;
+    border-radius: 0 0 12px 12px;
+}
+
+.modal-footer p {
+    margin: 0;
+    text-align: center;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.instruction-section {
+    margin-bottom: 24px;
+}
+
+.instruction-section:last-child {
+    margin-bottom: 0;
+}
+
+.instruction-section h3 {
+    margin: 0 0 12px 0;
+    color: #495057;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.instruction-section ul {
+    margin: 0;
+    padding-left: 20px;
+    list-style-type: disc;
+}
+
+.instruction-section li {
+    margin-bottom: 8px;
+    line-height: 1.5;
+    color: #495057;
+}
+
+.instruction-section li:last-child {
+    margin-bottom: 0;
+}
+
+.instruction-section strong {
+    color: #212529;
+}
+
+
+/* Keyboard shortcut styling */
+
+kbd {
+    display: inline-block;
+    padding: 2px 6px;
+    font-size: 0.8rem;
+    color: #495057;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    font-family: monospace;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    margin: 0 2px;
+}
+
+
+/* Code section styling */
+
+.code-section {
+    margin-bottom: 20px;
+}
+
+.code-section h4 {
+    margin: 0 0 8px 0;
+    color: #495057;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.code-block {
+    position: relative;
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.code-block pre {
+    margin: 0;
+    padding: 16px;
+    background: none;
+    border: none;
+    border-radius: 0;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    overflow-x: auto;
+}
+
+.code-block code {
+    color: #495057;
+    font-family: 'Monaco', 'Consolas', monospace;
+}
+
+.copy-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 1;
+}
+
+.copy-btn:hover {
+    background: #0056b3;
+}
+
+.copy-btn.copied {
+    background: #28a745;
+}
+
+.server-info {
+    background-color: #f8f9fa;
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    margin: 0;
+    list-style: none;
+}
+
+.server-info li {
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.server-info li:last-child {
+    margin-bottom: 0;
+}
+
+.server-info span {
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: 0.85rem;
+    color: #007bff;
+    font-weight: 500;
+}
+
+.note-box {
+    background-color: #e7f3ff;
+    border: 1px solid #b8daff;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-top: 16px;
+}
+
+.note-box p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #004085;
+    line-height: 1.5;
+}
+
+.note-box code {
+    background-color: rgba(0, 0, 0, 0.1);
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-size: 0.8rem;
+}
+
+
 /* Responsive Design */
 
 @media (max-width: 1200px) {
@@ -565,6 +979,25 @@ h1 {
     }
     #channel-controls input {
         width: 100%;
+    }
+    /* Help button responsive */
+    #help-btn {
+        width: 45px;
+        height: 45px;
+        font-size: 1rem;
+    }
+    .modal-content {
+        margin: 10px;
+        max-height: 95vh;
+    }
+    .modal-header {
+        padding: 16px 16px 12px;
+    }
+    .modal-body {
+        padding: 16px;
+    }
+    .modal-footer {
+        padding: 12px 16px 16px;
     }
     #controls {
         flex-direction: column;
@@ -594,6 +1027,39 @@ h1 {
         flex-direction: column;
         align-items: flex-start;
         gap: 5px;
+    }
+    .expand-icon {
+        position: static;
+        transform: none;
+        margin-top: 5px;
+        align-self: flex-end;
+    }
+    .json-formatted,
+    .text-formatted {
+        font-size: 0.75rem;
+        max-height: 300px;
+    }
+    /* Code sections responsive */
+    .code-block pre {
+        padding: 12px;
+        font-size: 0.75rem;
+    }
+    .copy-btn {
+        top: 6px;
+        right: 6px;
+        padding: 3px 6px;
+        font-size: 0.7rem;
+    }
+    .server-info {
+        padding: 12px;
+    }
+    .server-info li {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+    .server-info span {
+        font-size: 0.75rem;
     }
 }
 
