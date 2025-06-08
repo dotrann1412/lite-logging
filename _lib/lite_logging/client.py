@@ -10,7 +10,13 @@ class ContentType(str, Enum):
 DEFAULT_TIMEOUT = 60
 SERVER_URL = os.getenv("LITE_LOGGING_BASE_URL", "http://localhost:8080")
 
-async def async_log(message: str | dict, tags: list[str] = [], channel: str = "logs", content_type: ContentType = ContentType.TEXT, server_url: str = SERVER_URL):
+async def async_log(
+    message: str | dict, 
+    tags: list[str] = [], 
+    channel: str = "logs", 
+    content_type: ContentType = ContentType.TEXT, 
+    server_url: str = SERVER_URL
+):
     if isinstance(message, dict):
         message = json.dumps(message)
 
@@ -29,7 +35,13 @@ async def async_log(message: str | dict, tags: list[str] = [], channel: str = "l
 
     return resp.status_code == 200
 
-def sync_log(message: str | dict, tags: list[str] = [], channel: str = "logs", content_type: ContentType = ContentType.TEXT, server_url: str = SERVER_URL):
+def sync_log(
+    message: str | dict,
+    tags: list[str] = [],
+    channel: str = "logs",
+    content_type: ContentType = ContentType.TEXT,
+    server_url: str = SERVER_URL
+):
     if isinstance(message, dict):
         message = json.dumps(message)
 
