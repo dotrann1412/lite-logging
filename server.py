@@ -11,7 +11,8 @@ logger = logging.getLogger(__name__)
 
 from app.apis import api_router
 import time
-from fastapi import Request, Response
+from fastapi import Request, Response, HTTPException
+from fastapi.responses import FileResponse
 from typing import Callable
 import os
 
@@ -51,6 +52,21 @@ def main():
     @server_app.get("/health")
     async def healthcheck():
         return {"status": "ok", "message": "Yo, I am alive"}
+    
+    @server_app.exception_handler(404)
+    async def custom_404_handler(request: Request, exc: HTTPException):
+        """
+        Handle 404 errors by serving index.html for client-side routing support
+        """
+        # Check if the request is for an API endpoint
+        if request.url.path.startswith(api_router.prefix):
+            return fastapi.responses.JSONResponse(
+                status_code=404,
+                content={"detail": "Not Found"}
+            )
+        
+        # For all other requests, serve index.html to support client-side routing
+        return FileResponse("public/index.html")
     
     @server_app.middleware("http")
     async def log_request_processing_time(request: Request, call_next: Callable) -> Response:
