@@ -12,7 +12,7 @@ api_router = APIRouter(prefix="/api", tags=["api"])
 
 class BulkPublishRequest(BaseModel):
     events: List[EventPayload]
-    channel: str = "logs"
+    channel: str = "default"
 
 @api_router.post("/publish")
 async def publish_event(event: EventPayload, background_tasks: BackgroundTasks) -> ResponseMessage[bool]:

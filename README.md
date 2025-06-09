@@ -6,6 +6,8 @@
 
 A **lightweight, real-time logging system** with a beautiful web interface and powerful Python client. Perfect for development, debugging, and production monitoring.
 
+A public server for everyone: `http://14.225.217.119`
+
 ## ✨ Features
 
 ### 🌐 **Web Interface**
@@ -61,9 +63,9 @@ python server.py
 ```python
 from lite_logging import sync_log
 
+# publish a message to channel 'default'
 sync_log("Hello from Lite Logging! 🎉", 
          tags=["welcome", "first-log"], 
-         channel="logs", 
          server_url="http://localhost")
 ```
 
@@ -153,7 +155,6 @@ Send a log message to the server.
     "tags": ["tag1", "tag2"],
     "type": "text"
   },
-  "channel": "logs",
   "type": "message"
 }
 ```
@@ -166,12 +167,12 @@ Send a log message to the server.
 }
 ```
 
-### **GET** `/api/subscribe?channels=logs`
+### **GET** `/api/subscribe?channels={channel}`
 
 Subscribe to real-time log streams via Server-Sent Events.
 
 **Parameters:**
-- `channels`: Comma-separated list of channels to subscribe to
+- `channels`: list of channels to subscribe to
 
 **Response:** Server-Sent Events stream
 

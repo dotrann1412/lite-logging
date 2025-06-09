@@ -11,10 +11,11 @@ class LogViewer {
 
         // Auto-reconnect properties
         this.reconnectAttempts = 0;
-        this.maxReconnectAttempts = 10;
+        this.maxReconnectAttempts = 32;
         this.baseReconnectDelay = 1000; // 1 second
         this.maxReconnectDelay = 30000; // 30 seconds
         this.reconnectTimer = null;
+        this.connectionTimeoutTimer = null; // Manual timeout for connections
         this.isReconnecting = false;
 
         // Channel management
@@ -43,12 +44,12 @@ class LogViewer {
     loadCurrentChannel() {
         try {
             const saved = localStorage.getItem('logViewer_currentChannel');
-            const channel = saved || 'logs';
+            const channel = saved || 'default';
             console.log(`Loading saved channel: ${channel}`);
             return channel;
         } catch (error) {
             console.warn('Failed to load current channel:', error);
-            return 'logs';
+            return 'default';
         }
     }
 
@@ -64,11 +65,11 @@ class LogViewer {
     loadChannelHistory() {
         try {
             const saved = localStorage.getItem('logViewer_channelHistory');
-            const history = saved ? new Set(JSON.parse(saved)) : new Set(['logs']);
+            const history = saved ? new Set(JSON.parse(saved)) : new Set(['default']);
             return history;
         } catch (error) {
             console.warn('Failed to load channel history:', error);
-            return new Set(['logs']);
+            return new Set(['default']);
         }
     }
 
@@ -222,15 +223,38 @@ class LogViewer {
             this.reconnectTimer = null;
         }
 
+        // Clear any existing connection timeout
+        if (this.connectionTimeoutTimer) {
+            clearTimeout(this.connectionTimeoutTimer);
+            this.connectionTimeoutTimer = null;
+        }
+
         this.updateConnectionStatus('connecting', `Connecting to '${this.currentChannel}'...`);
         this.isReconnecting = false;
 
         const url = `/api/subscribe?channels=${encodeURIComponent(this.currentChannel)}`;
+
+        // Create EventSource with proper constructor (no timeout parameter)
         this.eventSource = new EventSource(url);
+
+        // Implement connection timeout manually (5 seconds)
+        this.connectionTimeoutTimer = setTimeout(() => {
+            console.warn('Connection timeout after 5 seconds');
+            if (this.eventSource && this.eventSource.readyState === EventSource.CONNECTING) {
+                this.eventSource.close();
+                this.attemptReconnect();
+            }
+        }, 5000);
 
         this.eventSource.onopen = () => {
             console.log(`Connected to '${this.currentChannel}' channel`);
             this.updateConnectionStatus('connected', `Connected to '${this.currentChannel}'`);
+
+            // Clear connection timeout since we're now connected
+            if (this.connectionTimeoutTimer) {
+                clearTimeout(this.connectionTimeoutTimer);
+                this.connectionTimeoutTimer = null;
+            }
 
             // Reset channel connect button
             this.elements.channelConnectBtn.disabled = false;
@@ -244,8 +268,6 @@ class LogViewer {
             if (this.logs.length === 0) {
                 this.elements.noLogsMessage.classList.remove('hidden');
             }
-
-
 
             // Reset reconnection attempts on successful connection
             this.reconnectAttempts = 0;
@@ -264,6 +286,12 @@ class LogViewer {
 
         this.eventSource.onerror = (event) => {
             console.error('Error occurred with EventSource:', event);
+
+            // Clear connection timeout if it's still running
+            if (this.connectionTimeoutTimer) {
+                clearTimeout(this.connectionTimeoutTimer);
+                this.connectionTimeoutTimer = null;
+            }
 
             // Close the current connection
             if (this.eventSource) {
@@ -331,6 +359,11 @@ class LogViewer {
             this.reconnectTimer = null;
         }
 
+        if (this.connectionTimeoutTimer) {
+            clearTimeout(this.connectionTimeoutTimer);
+            this.connectionTimeoutTimer = null;
+        }
+
         this.subscribeToLogs();
     }
 
@@ -366,6 +399,11 @@ class LogViewer {
         if (this.reconnectTimer) {
             clearTimeout(this.reconnectTimer);
             this.reconnectTimer = null;
+        }
+
+        if (this.connectionTimeoutTimer) {
+            clearTimeout(this.connectionTimeoutTimer);
+            this.connectionTimeoutTimer = null;
         }
 
         // Save current channel logs BEFORE changing currentChannel
@@ -643,6 +681,9 @@ Are you sure you want to continue?`;
         if (this.reconnectTimer) {
             clearTimeout(this.reconnectTimer);
         }
+        if (this.connectionTimeoutTimer) {
+            clearTimeout(this.connectionTimeoutTimer);
+        }
         if (this.saveTimer) {
             clearTimeout(this.saveTimer);
         }
@@ -651,8 +692,8 @@ Are you sure you want to continue?`;
         }
 
         // Reset to defaults
-        this.currentChannel = 'logs';
-        this.channelHistory = new Set(['logs']);
+        this.currentChannel = 'default';
+        this.channelHistory = new Set(['default']);
         this.logs = [];
         this.filteredLogs = [];
         this.pendingLogs = [];
@@ -661,7 +702,7 @@ Are you sure you want to continue?`;
         this.isPaused = false;
 
         // Reset UI elements
-        this.elements.channelSelector.value = 'logs';
+        this.elements.channelSelector.value = 'default';
         this.elements.logsContent.innerHTML = '';
         this.elements.noLogsMessage.classList.remove('hidden');
         this.elements.loadingIndicator.classList.add('hidden');
@@ -680,7 +721,7 @@ Are you sure you want to continue?`;
 
         // Start fresh connection to default channel
         setTimeout(() => {
-            console.log('Starting fresh connection to logs channel...');
+            console.log('Starting fresh connection to default channel...');
             this.subscribeToLogs();
         }, 500);
 
@@ -1369,6 +1410,9 @@ sync_log("Debug info", tags=["debug"], channel="debug")`;
         }
         if (this.reconnectTimer) {
             clearTimeout(this.reconnectTimer);
+        }
+        if (this.connectionTimeoutTimer) {
+            clearTimeout(this.connectionTimeoutTimer);
         }
         if (this.saveTimer) {
             clearTimeout(this.saveTimer);

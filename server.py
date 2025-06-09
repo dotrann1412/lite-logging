@@ -38,14 +38,6 @@ def main():
         lifespan=lifespan
     )
 
-    server_app.add_middleware(
-        CORSMiddleware,
-        allow_origins=["*"],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
-
     server_app.include_router(api_router)
     server_app.mount("/", fastapi.staticfiles.StaticFiles(directory="public"), name="web")
 
