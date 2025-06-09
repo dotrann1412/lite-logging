@@ -17,6 +17,19 @@ jobs:
         with:
           python-version: '3.10'
 
+      - name: Sync version from Git tag
+        run: |
+          # Extract version from tag (remove 'v' prefix)
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "Version extracted from tag: $VERSION"
+          
+          # Update version in pyproject.toml
+          sed -i "s/^version = .*/version = \"$VERSION\"/" pyproject.toml
+          
+          # Verify the change
+          echo "Updated pyproject.toml version:"
+          grep "^version" pyproject.toml
+
       - name: Install build tools
         run: |
           python -m pip install --upgrade pip
