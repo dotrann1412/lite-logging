@@ -3,6 +3,7 @@
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.68+-00a393.svg)](https://fastapi.tiangolo.com/)
+[![PyPI version](https://img.shields.io/pypi/v/lite-logging-client)](https://pypi.org/project/lite-logging-client/)
 
 A **lightweight, real-time logging system** with a beautiful web interface and powerful Python client. Perfect for development, debugging, and production monitoring.
 
