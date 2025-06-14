@@ -148,17 +148,6 @@ class LogViewer {
     }
 
     setupEventListeners() {
-        // Channel management
-
-        // while hovering the input, show the connect button
-        this.elements.channelSelector.addEventListener('focusin', () => {
-            this.elements.channelConnectBtn.style.display = 'flex';
-        });
-
-        this.elements.channelSelector.addEventListener('focusout', () => {
-            this.elements.channelConnectBtn.style.display = 'none';
-        });
-
         this.elements.channelConnectBtn.addEventListener('click', () => this.switchChannel());
         this.elements.channelSelector.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
@@ -821,7 +810,7 @@ sync_log("Debug info", tags=["debug"], channel="debug")`;
         }
 
         try {
-            await navigator.clipboard.writeText(textToCopy);
+            await this.copyToClipboard(textToCopy);
 
             // Show success feedback
             const originalText = button.textContent;
@@ -835,35 +824,11 @@ sync_log("Debug info", tags=["debug"], channel="debug")`;
 
             console.log('Text copied to clipboard');
         } catch (error) {
-            console.warn('Failed to copy text:', error);
-
-            // Fallback for older browsers
-            try {
-                const textArea = document.createElement('textarea');
-                textArea.value = textToCopy;
-                document.body.appendChild(textArea);
-                textArea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textArea);
-
-                // Show success feedback
-                const originalText = button.textContent;
-                button.textContent = '✅';
-                button.classList.add('copied');
-
-                setTimeout(() => {
-                    button.textContent = originalText;
-                    button.classList.remove('copied');
-                }, 2000);
-
-                console.log('Text copied to clipboard (fallback)');
-            } catch (fallbackError) {
-                console.error('Copy failed:', fallbackError);
-                button.textContent = '❌';
-                setTimeout(() => {
-                    button.textContent = '📋';
-                }, 1000);
-            }
+            console.error('Copy failed:', error);
+            button.textContent = '❌';
+            setTimeout(() => {
+                button.textContent = '📋';
+            }, 1000);
         }
     }
 
@@ -1429,26 +1394,59 @@ sync_log("Debug info", tags=["debug"], channel="debug")`;
         const url = new URL(window.location.href);
         url.searchParams.set('channel', this.currentChannel);
         
-        // Copy to clipboard
-        navigator.clipboard.writeText(url.toString()).then(() => {
-            // Show success feedback
-            const originalHTML = this.elements.shareBtn.innerHTML;
-            this.elements.shareBtn.innerHTML = '<span class="share-icon">✅</span><span class="share-text">Copied!</span>';
-            this.elements.shareBtn.classList.add('copied');
+        // Copy to clipboard with fallback for unsupported environments
+        this.copyToClipboard(url.toString())
+            .then(() => {
+                // Show success feedback
+                const originalHTML = this.elements.shareBtn.innerHTML;
+                this.elements.shareBtn.innerHTML = '<span class="share-icon">✅</span><span class="share-text">Copied!</span>';
+                this.elements.shareBtn.classList.add('copied');
 
-            setTimeout(() => {
-                this.elements.shareBtn.innerHTML = originalHTML;
-                this.elements.shareBtn.classList.remove('copied');
-            }, 2000);
+                setTimeout(() => {
+                    this.elements.shareBtn.innerHTML = originalHTML;
+                    this.elements.shareBtn.classList.remove('copied');
+                }, 2000);
 
-            console.log('Channel link copied to clipboard');
-        }).catch(error => {
-            console.warn('Failed to copy link:', error);
-            this.elements.shareBtn.innerHTML = '<span class="share-icon">❌</span><span class="share-text">Failed</span>';
-            setTimeout(() => {
-                this.elements.shareBtn.innerHTML = '<span class="share-icon">🔗</span><span class="share-text">Share</span>';
-            }, 1000);
-        });
+                console.log('Channel link copied to clipboard');
+            })
+            .catch(error => {
+                const msg = "Use this URL: " + url.toString();
+                alert(msg);
+            });
+    }
+
+    async copyToClipboard(text) {
+        // Check if navigator.clipboard is available (secure context required)
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            try {
+                await navigator.clipboard.writeText(text);
+                return;
+            } catch (error) {
+                console.warn('Modern clipboard API failed, trying fallback:', error);
+            }
+        }
+
+        // Fallback for older browsers or non-secure contexts
+        try {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            const result = document.execCommand('copy');
+            document.body.removeChild(textArea);
+            
+            if (!result) {
+                throw new Error('execCommand copy failed');
+            }
+        } catch (fallbackError) {
+            console.error('Fallback copy failed:', fallbackError);
+            throw new Error('Copy to clipboard not supported in this browser/context');
+        }
     }
 }
 
