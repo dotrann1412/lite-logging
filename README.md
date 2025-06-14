@@ -150,12 +150,13 @@ Send a log message to the server.
 **Request Body:**
 ```json
 {
-  "data": {
-    "data": "Your log message or JSON object",
-    "tags": ["tag1", "tag2"],
-    "type": "text"
-  },
-  "type": "message"
+    "data": {
+        "data": "Hello, world!",
+        "type": "text",
+        "tags": ["test"]
+    },
+    "channel": "default",
+    "type": "message"
 }
 ```
 

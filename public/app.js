@@ -43,6 +43,18 @@ class LogViewer {
 
     loadCurrentChannel() {
         try {
+            // First check URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const channelFromUrl = urlParams.get('channel');
+
+            if (channelFromUrl) {
+                console.log(`Loading channel from URL: ${channelFromUrl}`);
+                const channelInput = document.getElementById('channel-selector');
+                channelInput.value = channelFromUrl;
+                return channelFromUrl;
+            }
+
+            // Fall back to localStorage
             const saved = localStorage.getItem('logViewer_currentChannel');
             const channel = saved || 'default';
             console.log(`Loading saved channel: ${channel}`);
@@ -84,19 +96,10 @@ class LogViewer {
     init() {
         this.initializeElements();
         this.setupEventListeners();
-        this.setChannelSelectorValue(); // Set the channel selector to the saved channel
         this.updateChannelHistoryDropdown();
         this.loadStoredLogs(); // Load stored logs before subscribing
         this.updateStats();
         this.subscribeToLogs();
-    }
-
-    setChannelSelectorValue() {
-        // Set the channel selector input to match the current channel
-        if (this.elements.channelSelector) {
-            this.elements.channelSelector.value = this.currentChannel;
-            console.log(`Set channel selector to: ${this.currentChannel}`);
-        }
     }
 
     initializeElements() {
@@ -110,6 +113,7 @@ class LogViewer {
             // Channel elements
             channelSelector: document.getElementById('channel-selector'),
             channelConnectBtn: document.getElementById('channel-connect-btn'),
+            shareChannelBtn: document.getElementById('share-channel-btn'),
             channelHistory: document.getElementById('channel-history'),
 
             // Filter elements
@@ -135,13 +139,26 @@ class LogViewer {
             logsViewport: document.getElementById('logs-viewport'),
             loadingIndicator: document.getElementById('loading-indicator'),
             noLogsMessage: document.getElementById('no-logs-message'),
-            scrollToBottom: document.getElementById('scroll-to-bottom'),
-            scrollBottomBtn: document.getElementById('scroll-bottom-btn')
+            scrollToTop: document.getElementById('scroll-to-top'),
+            scrollTopBtn: document.getElementById('scroll-top-btn'),
+
+            // Share button
+            shareBtn: document.getElementById('share-channel-btn')
         };
     }
 
     setupEventListeners() {
         // Channel management
+
+        // while hovering the input, show the connect button
+        this.elements.channelSelector.addEventListener('focusin', () => {
+            this.elements.channelConnectBtn.style.display = 'flex';
+        });
+
+        this.elements.channelSelector.addEventListener('focusout', () => {
+            this.elements.channelConnectBtn.style.display = 'none';
+        });
+
         this.elements.channelConnectBtn.addEventListener('click', () => this.switchChannel());
         this.elements.channelSelector.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
@@ -170,7 +187,7 @@ class LogViewer {
         this.elements.clearLogsBtn.addEventListener('click', () => this.clearLogs());
         this.elements.exportLogsBtn.addEventListener('click', () => this.exportLogs());
         this.elements.pauseBtn.addEventListener('click', () => this.togglePause());
-        this.elements.scrollBottomBtn.addEventListener('click', () => this.scrollToBottom());
+        this.elements.scrollTopBtn.addEventListener('click', () => this.scrollToTop());
 
         // Help modal
         this.elements.helpBtn.addEventListener('click', () => this.showHelp());
@@ -207,6 +224,9 @@ class LogViewer {
                 this.retryConnection();
             }
         });
+
+        // Share button
+        this.elements.shareBtn.addEventListener('click', () => this.shareChannel());
     }
 
     debounceFilter() {
@@ -256,12 +276,6 @@ class LogViewer {
                 this.connectionTimeoutTimer = null;
             }
 
-            // Reset channel connect button
-            this.elements.channelConnectBtn.disabled = false;
-            this.elements.channelConnectBtn.textContent = '🔗';
-            this.elements.channelConnectBtn.title = 'Connect to channel';
-
-            // Hide loading indicator now that we're connected
             this.elements.loadingIndicator.classList.add('hidden');
 
             // If no logs are displayed, show empty message
@@ -384,10 +398,6 @@ class LogViewer {
         console.log(`Switching from '${oldChannel}' to '${newChannel}' channel`);
 
         // Show loading state
-        this.elements.channelConnectBtn.disabled = true;
-        this.elements.channelConnectBtn.textContent = '⏳';
-        this.elements.channelConnectBtn.title = 'Switching channel...';
-
         console.log(`Starting channel switch process...`);
 
         // Close current connection
@@ -461,9 +471,9 @@ class LogViewer {
                 this.filterAndDisplayLogs();
                 this.updateStats();
 
-                // Auto-scroll to bottom to show most recent
+                // Auto-scroll to top to show most recent
                 if (this.isAutoScroll) {
-                    setTimeout(() => this.scrollToBottom(), 100);
+                    setTimeout(() => this.scrollToTop(), 100);
                 }
 
                 console.log(`Successfully loaded and displayed ${storedLogs.length} stored logs`);
@@ -715,9 +725,7 @@ Are you sure you want to continue?`;
 
         // Reset connection status
         this.updateConnectionStatus('disconnected', 'Disconnected');
-        this.elements.channelConnectBtn.disabled = false;
-        this.elements.channelConnectBtn.textContent = '🔗';
-        this.elements.channelConnectBtn.title = 'Connect to channel';
+        this.elements.channelConnectBtn.style.display = 'none';
 
         // Start fresh connection to default channel
         setTimeout(() => {
@@ -876,8 +884,8 @@ sync_log("Debug info", tags=["debug"], channel="debug")`;
             this.elements.logsContent.removeChild(this.elements.logsContent.firstChild);
         }
 
-        // Hide scroll-to-bottom button
-        this.hideScrollToBottomButton();
+        // Hide scroll-to-top button
+        this.hideScrollToTopButton();
 
         // Show loading state and hide other states
         this.elements.noLogsMessage.classList.add('hidden');
@@ -949,11 +957,11 @@ sync_log("Debug info", tags=["debug"], channel="debug")`;
             console.log(`Adding log to DOM for channel '${this.currentChannel}'`);
             this.addLogToDOM(log, true);
 
-            // Auto-scroll if enabled and user is at bottom
-            if (this.isAutoScroll && this.isScrolledToBottom()) {
-                this.scrollToBottom();
-            } else if (!this.isScrolledToBottom()) {
-                this.showScrollToBottomButton();
+            // Auto-scroll if enabled and user is at top
+            if (this.isAutoScroll && this.isScrolledToTop()) {
+                this.scrollToTop();
+            } else if (!this.isScrolledToTop()) {
+                this.showScrollToTopButton();
             }
         }
     }
@@ -1010,8 +1018,9 @@ sync_log("Debug info", tags=["debug"], channel="debug")`;
         // Create document fragment for efficient DOM manipulation
         const fragment = document.createDocumentFragment();
 
-        // Use virtual scrolling for better performance with large lists
-        this.filteredLogs.forEach((log, index) => {
+        // Display logs in reverse order (newest first)
+        const reversedLogs = [...this.filteredLogs].reverse();
+        reversedLogs.forEach((log, index) => {
             const logElement = this.createLogElement(log);
             fragment.appendChild(logElement);
         });
@@ -1022,7 +1031,7 @@ sync_log("Debug info", tags=["debug"], channel="debug")`;
         console.log(`Successfully displayed ${this.filteredLogs.length} logs. DOM children count: ${this.elements.logsContent.children.length}`);
 
         if (this.isAutoScroll) {
-            this.scrollToBottom();
+            this.scrollToTop();
         }
     }
 
@@ -1030,7 +1039,8 @@ sync_log("Debug info", tags=["debug"], channel="debug")`;
         if (!this.matchesFilters(log)) return;
 
         const logElement = this.createLogElement(log, isNew);
-        this.elements.logsContent.appendChild(logElement);
+        // Prepend new logs to show newest at top
+        this.elements.logsContent.insertBefore(logElement, this.elements.logsContent.firstChild);
         this.filteredLogs.push(log);
 
         // Remove animation class after animation completes
@@ -1170,15 +1180,10 @@ sync_log("Debug info", tags=["debug"], channel="debug")`;
             return;
         }
 
-        // Only toggle if clicking on header area or preview content
-        const isClickableArea = e.target.closest('.log-header') || 
-                               e.target.closest('.log-preview') ||
-                               e.target.classList.contains('log-item');
-
-        if (isClickableArea) {
-            e.preventDefault();
-            this.toggleLogExpansion(logItem);
-        }
+        // Allow clicking anywhere in the log item to expand/collapse
+        // Only exclude expanded content area which allows text selection
+        e.preventDefault();
+        this.toggleLogExpansion(logItem);
 
         this.mouseDownData = null;
     }
@@ -1237,8 +1242,8 @@ sync_log("Debug info", tags=["debug"], channel="debug")`;
         this.elements.autoScrollBtn.classList.toggle('active', this.isAutoScroll);
 
         if (this.isAutoScroll) {
-            this.scrollToBottom();
-            this.hideScrollToBottomButton();
+            this.scrollToTop();
+            this.hideScrollToTopButton();
         }
     }
 
@@ -1299,27 +1304,27 @@ sync_log("Debug info", tags=["debug"], channel="debug")`;
         URL.revokeObjectURL(url);
     }
     
-    scrollToBottom() {
-        this.elements.logsViewport.scrollTop = this.elements.logsViewport.scrollHeight;
-        this.hideScrollToBottomButton();
+    scrollToTop() {
+        this.elements.logsViewport.scrollTop = 0;
+        this.hideScrollToTopButton();
     }
     
-    isScrolledToBottom() {
+    isScrolledToTop() {
         const viewport = this.elements.logsViewport;
-        return viewport.scrollTop + viewport.clientHeight >= viewport.scrollHeight - 50;
+        return viewport.scrollTop <= 50;
     }
     
-    showScrollToBottomButton() {
-        this.elements.scrollToBottom.classList.remove('hidden');
+    showScrollToTopButton() {
+        this.elements.scrollToTop.classList.remove('hidden');
     }
     
-    hideScrollToBottomButton() {
-        this.elements.scrollToBottom.classList.add('hidden');
+    hideScrollToTopButton() {
+        this.elements.scrollToTop.classList.add('hidden');
     }
     
     handleScroll() {
-        if (this.isScrolledToBottom()) {
-            this.hideScrollToBottomButton();
+        if (this.isScrolledToTop()) {
+            this.hideScrollToTopButton();
         }
     }
     
@@ -1380,10 +1385,10 @@ sync_log("Debug info", tags=["debug"], channel="debug")`;
             this.togglePause();
         }
         
-        // End: Scroll to bottom
-        if (e.key === 'End') {
+        // Home: Scroll to top (newest logs)
+        if (e.key === 'Home') {
             e.preventDefault();
-            this.scrollToBottom();
+            this.scrollToTop();
         }
         
         // Enter: Toggle expansion of focused log (when not in input)
@@ -1418,6 +1423,32 @@ sync_log("Debug info", tags=["debug"], channel="debug")`;
             clearTimeout(this.saveTimer);
         }
         clearTimeout(this.debounceTimer);
+    }
+
+    shareChannel() {
+        const url = new URL(window.location.href);
+        url.searchParams.set('channel', this.currentChannel);
+        
+        // Copy to clipboard
+        navigator.clipboard.writeText(url.toString()).then(() => {
+            // Show success feedback
+            const originalHTML = this.elements.shareBtn.innerHTML;
+            this.elements.shareBtn.innerHTML = '<span class="share-icon">✅</span><span class="share-text">Copied!</span>';
+            this.elements.shareBtn.classList.add('copied');
+
+            setTimeout(() => {
+                this.elements.shareBtn.innerHTML = originalHTML;
+                this.elements.shareBtn.classList.remove('copied');
+            }, 2000);
+
+            console.log('Channel link copied to clipboard');
+        }).catch(error => {
+            console.warn('Failed to copy link:', error);
+            this.elements.shareBtn.innerHTML = '<span class="share-icon">❌</span><span class="share-text">Failed</span>';
+            setTimeout(() => {
+                this.elements.shareBtn.innerHTML = '<span class="share-icon">🔗</span><span class="share-text">Share</span>';
+            }, 1000);
+        });
     }
 }
 

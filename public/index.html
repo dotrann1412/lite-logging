@@ -15,13 +15,15 @@
 
             <div id="channel-controls">
                 <div class="filter-group">
-                    <input type="text" id="channel-selector" placeholder="Enter channel name..." value="default" autocomplete="off" list="channel-history">
+                    <input type="text" id="channel-selector" placeholder="Enter channel name..." value="default" autocomplete="off">
                     <datalist id="channel-history">
                         <option value="default">
-                            <option value="events">
-                            </datalist>
-                    <button id="channel-connect-btn" class="connect-btn" title="Connect to channel">🔗</button>
+                    </datalist>
+
+                    <button id="channel-connect-btn" class="connect-btn" title="Connect to channel">Connect</button>
                 </div>
+
+                <button id="share-channel-btn" class="share-btn" title="Share channel link">Share</button>
             </div>
 
             <h1>Lite Logging</h1>
@@ -85,8 +87,8 @@
             <div id="no-logs-message" class="hidden">No logs match the current filters</div>
         </div>
 
-        <div id="scroll-to-bottom" class="hidden">
-            <button id="scroll-bottom-btn">↓ New logs available</button>
+        <div id="scroll-to-top" class="hidden">
+            <button id="scroll-top-btn">↑ New logs available</button>
         </div>
 
         <!-- Floating Help Button -->
@@ -126,8 +128,8 @@
                     <div class="instruction-section">
                         <h3>📋 Log Interaction</h3>
                         <ul>
-                            <li><strong>Expand logs:</strong> Click on truncated logs to see full content</li>
-                            <li><strong>Select text:</strong> Click and drag in expanded logs to copy</li>
+                            <li><strong>Expand logs:</strong> Click anywhere on a log row to expand/collapse</li>
+                            <li><strong>Select text:</strong> Click and drag in expanded content to copy text</li>
                             <li><strong>JSON formatting:</strong> Expanded JSON logs are beautifully formatted</li>
                         </ul>
                     </div>
@@ -151,7 +153,7 @@
                             <li><kbd>Ctrl+E</kbd> - Export logs</li>
                             <li><kbd>Ctrl+I</kbd> - Show storage info</li>
                             <li><kbd>Space</kbd> - Toggle pause (when not typing)</li>
-                            <li><kbd>End</kbd> - Scroll to bottom</li>
+                            <li><kbd>Home</kbd> - Scroll to top (newest logs)</li>
                             <li><kbd>Enter</kbd> - Expand/collapse focused log</li>
                             <li><kbd>Ctrl+Shift+Delete</kbd> - Clear all storage ⚠️</li>
                         </ul>
