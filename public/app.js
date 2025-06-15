@@ -485,6 +485,8 @@ class LogViewer {
     }
 
     saveLogsToStorage(channelName = this.currentChannel) {
+        return; // turn off for now
+
         console.log('Saving logs to storage');
 
         try {
