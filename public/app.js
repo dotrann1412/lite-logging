@@ -538,6 +538,8 @@ class LogViewer {
     }
 
     debounceSaveToStorage() {
+        return; // turn off for now
+
         // Clear existing timer
         if (this.saveTimer) {
             clearTimeout(this.saveTimer);
