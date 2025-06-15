@@ -485,6 +485,8 @@ class LogViewer {
     }
 
     saveLogsToStorage(channelName = this.currentChannel) {
+        console.log('Saving logs to storage');
+
         try {
             const storageKey = this.storageKeyPrefix + channelName;
 
