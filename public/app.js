@@ -541,10 +541,10 @@ class LogViewer {
             clearTimeout(this.saveTimer);
         }
 
-        // Set new timer to save after 2 seconds of inactivity
+        // Set new timer to save after 30 seconds of inactivity
         this.saveTimer = setTimeout(() => {
             this.saveLogsToStorage();
-        }, 2000);
+        }, 30000);
     }
 
     getStorageSizeForChannel(channel) {
