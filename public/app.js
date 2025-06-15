@@ -1,6 +1,6 @@
 class LogViewer {
     constructor() {
-        this.MAX_LOGS = 10000;
+        this.MAX_LOGS = 100;
         this.logs = [];
         this.filteredLogs = [];
         this.eventSource = null;
