@@ -1,7 +1,7 @@
 from app.v1.pubsub import EventHandler, EventPayload
 import asyncio
 
-async def test_subcribe():
+async def test_subscribe():
     handler = EventHandler.event_handler()
     queue = await handler.subscribe(channels=["test"])
     assert queue is not None
@@ -24,7 +24,7 @@ async def test_publish():
     assert received.data == sample_event.data
 
 async def main():
-    await test_subcribe()
+    await test_subscribe()
     await test_unsubscribe()
     await test_publish()
 

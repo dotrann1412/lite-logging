@@ -1,7 +1,7 @@
 from app.v2.pubsub import EventHandler, EventPayload
 import asyncio
 
-async def test_subcribe():
+async def test_subscribe():
     handler = EventHandler[EventPayload]()
 
     test_id = "test_id"
@@ -52,7 +52,7 @@ async def test_publish():
     assert received == sample_event
     
 async def main():
-    await test_subcribe()
+    await test_subscribe()
     await test_unsubscribe()
     await test_publish()
 
