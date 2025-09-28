@@ -1,14 +1,14 @@
 from fastapi import Request, APIRouter, BackgroundTasks
 from sse_starlette.sse import EventSourceResponse
 from .pubsub import EventPayload, EventHandler
-from .models import ResponseMessage
+from app.models import ResponseMessage
 import logging
 from typing import List
 import asyncio
 from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
-api_router = APIRouter(prefix="/api", tags=["api"])
+api_router = APIRouter(tags=["v1"])
 
 class BulkPublishRequest(BaseModel):
     events: List[EventPayload]

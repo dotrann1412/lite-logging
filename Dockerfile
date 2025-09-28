@@ -7,7 +7,7 @@ workdir /workspace
 
 copy app app
 copy public public
-copy server.py server.py 
-expose 80
+copy server.py server.py
 
-entrypoint ["python", "server.py"]
+expose 80
+entrypoint ["uvicorn", "server:server_app", "--host", "0.0.0.0", "--port", "80", "--workers", "4"]

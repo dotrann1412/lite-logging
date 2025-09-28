@@ -4,7 +4,7 @@ from typing import Union, Optional
 from pydantic import BaseModel, Field
 from enum import Enum
 from functools import lru_cache
-from .utils import random_payload
+from app.utils import random_payload
 
 class WQueue(asyncio.Queue):
     def __init__(self, *args, **kwargs):
