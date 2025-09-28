@@ -29,6 +29,10 @@ class EventHandler(Generic[T]):
             composed_id = c + queue._id
             ids.add(composed_id)
             self.subscribers[composed_id] = queue
+
+            if c not in self.ids_by_channels:
+                self.ids_by_channels[c] = set()
+
             self.ids_by_channels[c].add(composed_id)
 
         self.ids_by_subscribers[queue._id] = ids
@@ -39,7 +43,7 @@ class EventHandler(Generic[T]):
         l_id = len(_id)
 
         for k in ids:
-            channel = k[-l_id:]
+            channel = k[:-l_id]
             self.subscribers.pop(k, None)
             self.ids_by_channels[channel].remove(k)
 
@@ -48,4 +52,4 @@ class EventHandler(Generic[T]):
 
         for c in channels:
             for v in self.ids_by_channels.get(c, []):
-                await v.put(event)
+                await self.subscribers[v].put(event)
