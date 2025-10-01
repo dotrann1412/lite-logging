@@ -1,9 +1,9 @@
 services:
-  app:
+  lite-logging-server:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: app
+    container_name: lite-logging-server
     restart: always
     ports:
       - "8000:8000"

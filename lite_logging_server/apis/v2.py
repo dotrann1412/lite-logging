@@ -1,9 +1,7 @@
-from fastapi import Request, APIRouter, BackgroundTasks
+from fastapi import Request, APIRouter, BackgroundTasks, responses
 from sse_starlette.sse import EventSourceResponse
-from .pubsub import EventPayload, EventHandler
-from app.models import ResponseMessage
+from lite_logging.pubsub.v2 import EventPayload, EventHandler, WQueue
 import logging
-from app.v2.pubsub import WQueue, EventPayload, EventHandler
 from dataclasses import asdict
 import json
 
@@ -25,10 +23,10 @@ async def unsubscribe(_id: str):
     return await _handler.unsubscribe(_id)
 
 @api_router.post("/publish")
-async def publish_event(request: Request, event: EventPayload, background_tasks: BackgroundTasks) -> ResponseMessage[bool]:
+async def publish_event(request: Request, event: EventPayload, background_tasks: BackgroundTasks) -> responses.Response:
     channels = request.query_params.getlist("channels")
     background_tasks.add_task(publish, channels, event)
-    return ResponseMessage[bool](result=True)
+    return responses.Response(status_code=200)
 
 @api_router.get("/subscribe")
 async def event_stream(

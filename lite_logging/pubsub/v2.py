@@ -11,7 +11,7 @@ class WQueue(asyncio.Queue):
 
 @dataclass
 class EventPayload:
-    payload: Union[dict, str] = field(default_factory=dict)
+    payload: Union[dict, str] = ""
     tags: list[str] = field(default_factory=list)
 
 class EventHandler(Generic[T]):
@@ -20,7 +20,7 @@ class EventHandler(Generic[T]):
         self.ids_by_subscribers: dict[str, set[str]] = {}
         self.ids_by_channels: dict[str, set[str]] = {}
 
-    async def subscribe(self, _id, channels: list[str] = []) -> WQueue:
+    async def subscribe(self, _id: str, channels: list[str] = []) -> WQueue:
         queue: WQueue = WQueue(_id)
         ids = set()
         channels = set(channels)

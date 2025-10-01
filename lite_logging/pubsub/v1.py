@@ -1,15 +1,14 @@
 import asyncio
 import uuid
+from dataclasses import dataclass, field
 from typing import Union, Optional
-from pydantic import BaseModel, Field
 from enum import Enum
-from functools import lru_cache
-from app.utils import random_payload
+import os
 
 class WQueue(asyncio.Queue):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, _id: str, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._id = uuid.uuid4().hex
+        self._id = _id
 
 class EventType(str, Enum):
     """Enum for event types"""
@@ -17,21 +16,22 @@ class EventType(str, Enum):
     ERROR = "error"
     INFO = "info"
 
-class EventPayload(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+@dataclass
+class EventPayload:
+    id: str = field(default_factory=lambda: os.urandom(6).hex())
     type: EventType = EventType.MESSAGE
-    data: dict
+    data: dict = field(default_factory=dict)
     channel: Optional[str] = None
 
 class EventHandler:
-    DEFAULT_CHANNEL = random_payload(6)
+    DEFAULT_CHANNEL = 'default'
 
     def __init__(self):
         self.subscribers: dict[str, WQueue] = {}
 
-    async def subscribe(self, channels: list[str] = []) -> WQueue:
+    async def subscribe(self, _id: str | None = None, channels: list[str] = []) -> WQueue:
         """Subscribe a new client to the event stream"""
-        queue: WQueue = WQueue()
+        queue: WQueue = WQueue(_id or uuid.uuid4().hex)
 
         if not channels:
             channels = [self.DEFAULT_CHANNEL]
@@ -105,8 +105,3 @@ class EventHandler:
         # Execute all put operations concurrently
         if publish_tasks:
             await asyncio.gather(*publish_tasks, return_exceptions=True)
-
-    @lru_cache(maxsize=1)
-    @staticmethod
-    def event_handler() -> 'EventHandler':
-        return EventHandler()

@@ -1,4 +1,3 @@
 fastapi[standard]
 uvicorn
-pydantic
 sse-starlette
