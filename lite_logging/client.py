@@ -147,7 +147,7 @@ class V2EventPayload_AES:
 class LiteLoggingClientV2_AES(LiteLoggingClientV2):
     def __init__(self, source: str | _HANDLER_TYPE, shared_key: str | bytes):
         super().__init__(source)
-        self.shared_key = shared_key.encode() if isinstance(shared_key, str) else shared_key
+        self.shared_key = bytes.fromhex(shared_key) if isinstance(shared_key, str) else shared_key
 
     async def async_subscribe(self, *channels: str) -> AsyncGenerator[V2EventPayload, None]:
         def deserializer(line: str) -> V2EventPayload:
@@ -177,7 +177,7 @@ class LiteLoggingClientV3(LiteLoggingClientBase):
 class LiteLoggingClientV3_AES(LiteLoggingClientV3):
     def __init__(self, source: str | _HANDLER_TYPE, shared_key: str | bytes):
         super().__init__(source)
-        self.shared_key = shared_key.encode() if isinstance(shared_key, str) else shared_key
+        self.shared_key = bytes.fromhex(shared_key) if isinstance(shared_key, str) else shared_key
 
     async def async_subscribe(self, *channels: str) -> AsyncGenerator[bytes, None]:
         async for event in super().async_subscribe(*channels):  
