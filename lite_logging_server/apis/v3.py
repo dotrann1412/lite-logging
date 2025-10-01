@@ -9,13 +9,13 @@ async def publish(channels: list[str] | set[str], event: bytes):
     global _handler
     return await _handler.publish(channels, event)
 
-async def subscribe(_id: str, channels: list[str] = []) -> WQueue:
+async def subscribe(client_id: str, channels: list[str] = []) -> WQueue:
     global _handler
-    return await _handler.subscribe(_id, channels)
+    return await _handler.subscribe(client_id, channels)
 
-async def unsubscribe(_id: str):
+async def unsubscribe(client_id: str):
     global _handler
-    return await _handler.unsubscribe(_id)
+    return await _handler.unsubscribe(client_id)
 
 logger = logging.getLogger(__name__)
 api_router = APIRouter(tags=["v3"])
@@ -29,12 +29,12 @@ async def publish_event(event: Request, background_tasks: BackgroundTasks) -> re
 @api_router.get("/subscribe")
 async def event_stream(request: Request) -> EventSourceResponse:
 
-    _id = f"{request.client.host}:{request.client.port}"
+    client_id = f"{request.client.host}:{request.client.port}"
     channels: list[str] = request.query_params.getlist("channels")
 
     async def event_generator():
         try:
-            queue = await subscribe(_id, channels)
+            queue = await subscribe(client_id, channels)
 
             while True:
                 event: bytes = await queue.get()
@@ -46,6 +46,6 @@ async def event_stream(request: Request) -> EventSourceResponse:
             logger.info(f"Error in event stream: {e}")
 
         finally:
-            await unsubscribe(_id)
+            await unsubscribe(client_id)
 
     return EventSourceResponse(event_generator())

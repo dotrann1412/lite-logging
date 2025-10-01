@@ -1,4 +1,4 @@
-from lite_logging.v2.pubsub import EventHandler, EventPayload
+from lite_logging.pubsub.v2 import EventHandler, EventPayload
 import asyncio
 
 async def test_subscribe():

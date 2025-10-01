@@ -6,9 +6,9 @@ from enum import Enum
 import os
 
 class WQueue(asyncio.Queue):
-    def __init__(self, _id: str, *args, **kwargs):
+    def __init__(self, queue_id: str, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._id = _id
+        self._id = queue_id
 
 class EventType(str, Enum):
     """Enum for event types"""
@@ -29,9 +29,9 @@ class EventHandler:
     def __init__(self):
         self.subscribers: dict[str, WQueue] = {}
 
-    async def subscribe(self, _id: str | None = None, channels: list[str] = []) -> WQueue:
+    async def subscribe(self, client_id: str | None = None, channels: list[str] = []) -> WQueue:
         """Subscribe a new client to the event stream"""
-        queue: WQueue = WQueue(_id or uuid.uuid4().hex)
+        queue: WQueue = WQueue(client_id or uuid.uuid4().hex)
 
         if not channels:
             channels = [self.DEFAULT_CHANNEL]
@@ -43,10 +43,10 @@ class EventHandler:
 
     async def unsubscribe(self, queue: Union[str, WQueue]):
         """Unsubscribe a client from the event stream"""
-        _id = queue if isinstance(queue, str) else queue._id
+        client_id = queue if isinstance(queue, str) else queue._id
 
         for k in list(self.subscribers.keys()):
-            if k.endswith(_id):
+            if k.endswith(client_id):
                 self.subscribers.pop(k, None)
 
     async def publish(self, event: EventPayload):

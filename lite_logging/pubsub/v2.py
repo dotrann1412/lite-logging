@@ -1,18 +1,26 @@
 import asyncio
-from typing import Union, TypeVar, Generic
-from dataclasses import dataclass, field
+from typing import Union, TypeVar, Generic, Literal
+from dataclasses import dataclass, field, fields
 
 T = TypeVar('T')
 
 class WQueue(asyncio.Queue):
-    def __init__(self, _id: str, *args, **kwargs):
+    def __init__(self, queue_id: str, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._id = _id
+        self._id = queue_id
 
 @dataclass
 class EventPayload:
     payload: Union[dict, str] = ""
     tags: list[str] = field(default_factory=list)
+
+    def __init__(self, payload: Union[dict, str] = "", tags: list[str] = [], **kwargs) -> None:
+        self.payload = payload
+        self.tags = tags
+
+        for f in fields(self):
+            if f.name in kwargs:
+                setattr(self, f.name, kwargs[f.name])
 
 class EventHandler(Generic[T]):
     def __init__(self):
@@ -20,8 +28,8 @@ class EventHandler(Generic[T]):
         self.ids_by_subscribers: dict[str, set[str]] = {}
         self.ids_by_channels: dict[str, set[str]] = {}
 
-    async def subscribe(self, _id: str, channels: list[str] = []) -> WQueue:
-        queue: WQueue = WQueue(_id)
+    async def subscribe(self, cient_id: str, channels: list[str] = []) -> WQueue:
+        queue: WQueue = WQueue(cient_id)
         ids = set()
         channels = set(channels)
 
@@ -38,9 +46,9 @@ class EventHandler(Generic[T]):
         self.ids_by_subscribers[queue._id] = ids
         return queue
 
-    async def unsubscribe(self, _id: str):
-        ids = self.ids_by_subscribers.pop(_id, [])
-        l_id = len(_id)
+    async def unsubscribe(self, client_id: str):
+        ids = self.ids_by_subscribers.pop(client_id, [])
+        l_id = len(client_id)
 
         for k in ids:
             channel = k[:-l_id]
