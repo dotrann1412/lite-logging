@@ -41,7 +41,7 @@ async def get_generator(
 ) -> AsyncGenerator[_EVENT_PAYLOAD_TYPE, None]:
     if isinstance(source, str):
         url = f"{source}/subscribe"
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=None) as client:
             async with client.stream("GET", url, params={"channels": channels}) as response:
                 async for line in response.aiter_lines():
                     if line and line.startswith("data: "):
@@ -71,8 +71,8 @@ class LiteLoggingClientBase(ABC):
             payload["data"] = event
         else:
             payload["json"] = asdict(event)
-            
-        async with httpx.AsyncClient() as client:
+
+        async with httpx.AsyncClient(timeout=httpx.Timeout(10)) as client:
             resp = await client.post(f"{self.source}/publish", **payload)
             return resp.status_code == 200
 
