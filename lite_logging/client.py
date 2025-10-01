@@ -25,7 +25,7 @@ async def v3_generator(
 ):
     if isinstance(source, str):
         url = f"{source}/subscribe"
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=None) as client:
             async with client.stream("GET", url, params={"channels": channels}) as response:
                 async for line in response.aiter_lines():
                     if line and line.startswith("data: "):
