@@ -2,6 +2,7 @@ from fastapi import Request, APIRouter, BackgroundTasks, Request, responses
 from sse_starlette.sse import EventSourceResponse
 import logging
 from lite_logging.pubsub.v2 import WQueue, EventHandler
+import starlette.requests
 
 _handler = EventHandler[bytes]()
 
@@ -23,7 +24,14 @@ api_router = APIRouter(tags=["v3"])
 @api_router.post("/publish")
 async def publish_event(event: Request, background_tasks: BackgroundTasks) -> responses.Response:
     channels = event.query_params.getlist("channels")
-    background_tasks.add_task(publish, channels, await event.body())
+
+    try:
+        body = await event.body()
+    except starlette.requests.ClientDisconnect as e:
+        logger.error(f"Error in publish_event: {e}")
+        return responses.Response(status_code=400)
+
+    background_tasks.add_task(publish, channels, body)
     return responses.Response(status_code=200)
 
 @api_router.get("/subscribe")
