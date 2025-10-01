@@ -1,21 +1,21 @@
-from lite_logging.v1.pubsub import EventHandler, EventPayload
+from lite_logging.pubsub.v1 import EventHandler, EventPayload
 import asyncio
 
 async def test_subscribe():
-    handler = EventHandler.event_handler()
+    handler = EventHandler()
     queue = await handler.subscribe(channels=["test"])
     assert queue is not None
     assert any(k.endswith(queue._id) for k in handler.subscribers.keys())
 
 async def test_unsubscribe():
-    handler = EventHandler.event_handler()
+    handler = EventHandler()
     queue = await handler.subscribe(channels=["test"])
     assert any(k.endswith(queue._id) for k in handler.subscribers.keys())
     await handler.unsubscribe(queue)
     assert all(not k.endswith(queue._id) for k in handler.subscribers.keys())
 
 async def test_publish():
-    handler = EventHandler.event_handler()
+    handler = EventHandler()
     queue = await handler.subscribe(channels=["test"])
     sample_event = EventPayload(data={"message": "test"}, channel="test")
     await handler.publish(sample_event)
