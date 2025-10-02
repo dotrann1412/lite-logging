@@ -59,7 +59,8 @@ async def log_request_processing_time(request: Request, call_next: Callable) -> 
     response: Response = await call_next(request)
     duration = asyncio.get_event_loop().time() - start_time
 
-    if request.url.path.startswith((api_router_v1.prefix, api_router_v2.prefix, api_router_v3.prefix)):
-        logger.info(f"{request.method} - {request.url.path} - {duration:.4f} seconds - {response.status_code}")
+    if request.url.path.startswith(('/api', '/api/v1', '/api/v2', '/api/v3', '/v1', '/v2', '/v3')):
+        channels = request.query_params.getlist("channels")
+        logger.info(f"{request.method} - {request.url.path} - {duration:.4f} seconds - {response.status_code} - {channels}")
 
     return response

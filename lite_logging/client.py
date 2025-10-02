@@ -188,7 +188,8 @@ class LiteLoggingClientV3_AES(LiteLoggingClientV3):
 
             try:
                 decrypted = decryptor.update(ciphertext) + decryptor.finalize()
-                yield unpadder.update(decrypted) + unpadder.finalize()
+                unpadded = unpadder.update(decrypted) + unpadder.finalize()
+                yield unpadded
             except Exception as e:
                 logger.error(f"Error while decrypting event: {e}")
 
