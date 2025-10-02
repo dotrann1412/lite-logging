@@ -34,9 +34,15 @@ server_app = fastapi.FastAPI(
 )
 
 server_app.include_router(api_router_v1, prefix="/api")
+
 server_app.include_router(api_router_v1, prefix="/api/v1")
 server_app.include_router(api_router_v2, prefix="/api/v2")
 server_app.include_router(api_router_v3, prefix="/api/v3")
+
+server_app.include_router(api_router_v1, prefix="/v1")
+server_app.include_router(api_router_v2, prefix="/v2")
+server_app.include_router(api_router_v3, prefix="/v3")
+
 server_app.mount("/", fastapi.staticfiles.StaticFiles(directory="public"), name="web")
 
 @server_app.get("/health")
